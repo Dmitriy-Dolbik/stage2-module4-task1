@@ -1,5 +1,7 @@
 package com.mjc.stage2.impl;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -11,21 +13,18 @@ import com.mjc.stage2.ConnectionFactory;
 
 public class H2ConnectionFactory implements ConnectionFactory
 {
-    private String driver;
-    private String url;
-    private String user;
-    private String password;
-
+    private static Properties properties;
+    static
     {
-        Properties properties = new Properties();
+        properties = new Properties();
         try (InputStream input = H2ConnectionFactory.class.getClassLoader()
-                .getResourceAsStream("app.properties"))
+                .getResourceAsStream("h2database.properties"))
         {
             properties.load(input);
-            driver = properties.getProperty("postgres.driver");
-            url = properties.getProperty("postgres.url");
-            password = properties.getProperty("postgres.password");
-            user = properties.getProperty("postgres.name");
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
         }
         catch (IOException e)
         {
@@ -38,22 +37,26 @@ public class H2ConnectionFactory implements ConnectionFactory
     {
         try
         {
-            Class.forName(driver);
-        }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        try
-        {
-            return DriverManager.getConnection(url, user, password);
+            try
+            {
+                Class.forName(properties.getProperty("jdbc_driver"));
+            }
+            catch (ClassNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+
+            return DriverManager.getConnection(
+                    properties.getProperty("db_url"),
+                    properties.getProperty("user"),
+                    properties.getProperty("password")
+            );
         }
         catch (SQLException e)
         {
             e.printStackTrace();
-            return null;
         }
-
+        return null;
     }
 }
 
