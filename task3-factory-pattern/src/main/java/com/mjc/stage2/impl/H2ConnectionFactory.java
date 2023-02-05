@@ -26,8 +26,18 @@ public class H2ConnectionFactory implements ConnectionFactory
             Class.forName(driver);
 
             return DriverManager.getConnection(url, user, password);
-        } catch (SQLException | IOException | ClassNotFoundException e){
-            e.printStackTrace();;
+        } catch (ClassNotFoundException e){
+            e.printStackTrace();
+            return null;
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
             return null;
         }
     }
