@@ -11,35 +11,49 @@ import com.mjc.stage2.ConnectionFactory;
 
 public class H2ConnectionFactory implements ConnectionFactory
 {
+    private String driver;
+    private String url;
+    private String user;
+    private String password;
+
+    {
+        Properties properties = new Properties();
+        try (InputStream input = H2ConnectionFactory.class.getClassLoader()
+                .getResourceAsStream("app.properties"))
+        {
+            properties.load(input);
+            driver = properties.getProperty("postgres.driver");
+            url = properties.getProperty("postgres.url");
+            password = properties.getProperty("postgres.password");
+            user = properties.getProperty("postgres.name");
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public Connection createConnection()
     {
-        Properties properties = new Properties();
-        try (InputStream inputStream = Connection.class.getClassLoader()
-                .getResourceAsStream("h2database.properties")){
-            properties.load(inputStream);
-            String driver = properties.getProperty("jdbc_driver");
-            String url = properties.getProperty("db_url");
-            String user = properties.getProperty("user");
-            String password = properties.getProperty("password");
-
+        try
+        {
             Class.forName(driver);
-
-            return DriverManager.getConnection(url, user, password);
-        } catch (ClassNotFoundException e){
+        }
+        catch (ClassNotFoundException e)
+        {
             e.printStackTrace();
-            return null;
+        }
+        try
+        {
+            return DriverManager.getConnection(url, user, password);
         }
         catch (SQLException e)
         {
             e.printStackTrace();
             return null;
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
+
     }
 }
 
